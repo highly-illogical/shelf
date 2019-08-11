@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <style>
+      body {
+        margin-top: 50px;
+        font-family: -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu,
+          Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        font-size: 15px;
+      }
+    </style>
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          id="link"
+          placeholder="Enter link here"
+        />
+        <div class="input-group-append">
+          <button class="btn btn-info" id="add">
+            Add
+          </button>
+        </div>
+      </div>
+      <ul class="list-group" id="linklist"></ul>
+    </div>
+    <script>
+      let storedLinks = JSON.parse(localStorage.getItem('links'));
+      storedLinks = storedLinks ? storedLinks : [];
+
+      const list = document.querySelector('#linklist');
+
+      function showLinks() {
+        storedLinks.forEach(link => addLink(link));
+      }
+
+      function addLink(link) {
+        const newLink = document.createElement('li');
+        newLink.setAttribute('class', 'list-group-item');
+        newLink.appendChild(document.createTextNode(link));
+
+        const shareButton = document.createElement('button');
+        shareButton.setAttribute('class', 'btn btn-outline-primary btn-sm m-2');
+        shareButton.innerText = 'Share';
+
+        const removeButton = document.createElement('button');
+        removeButton.setAttribute('class', 'btn btn-outline-danger btn-sm');
+        removeButton.innerText = 'Remove';
+
+        newLink.appendChild(shareButton);
+        newLink.appendChild(removeButton);
+        list.prepend(newLink);
+      }
+
+      function removeLink(i) {
+        storedLinks.splice(i, 1);
+        list.childNodes[list.childNodes.length - i - 1].remove();
+        localStorage.setItem('links', JSON.stringify(storedLinks));
+      }
+
+      function openShareWindow(link) {
+        window.open('https://www.facebook.com/sharer.php?u=' + link);
+      }
+
+      document.addEventListener('DOMContentLoaded', function(event) {
+        showLinks();
+        addButton = document.querySelector('#add');
+        addButton.addEventListener('click', function(event) {
+          link = document.querySelector('#link');
+          if (storedLinks.indexOf(link.value) !== -1) {
+            alert('This link is already in the list');
+          } else {
+            addLink(link.value);
+            storedLinks.push(link.value);
+            localStorage.setItem('links', JSON.stringify(storedLinks));
+            link.value = null;
+          }
+        });
+
+        list.addEventListener('click', function(event) {
+          targetLink = event.target.parentNode.firstChild.nodeValue;
+          if (event.target.classList.contains('btn-outline-primary')) {
+            openShareWindow(targetLink);
+          } else if (event.target.classList.contains('btn-outline-danger')) {
+            removeLink(storedLinks.indexOf(targetLink));
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
