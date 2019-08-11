@@ -36,19 +36,16 @@
       <ul class="list-group" id="linklist"></ul>
     </div>
     <script>
-      let storedLinks = JSON.parse(localStorage.getItem('links'));
-      storedLinks = storedLinks ? storedLinks : [];
-
       const list = document.querySelector('#linklist');
 
       function showLinks() {
-        storedLinks.forEach(link => addLink(link));
+        storedLinks.forEach(item => addLink(item));
       }
 
-      function addLink(link) {
+      function addLink(item) {
         const newLink = document.createElement('li');
         newLink.setAttribute('class', 'list-group-item');
-        newLink.appendChild(document.createTextNode(link));
+        newLink.appendChild(document.createTextNode(item.link));
 
         const shareButton = document.createElement('button');
         shareButton.setAttribute('class', 'btn btn-outline-primary btn-sm m-2');
@@ -64,9 +61,16 @@
       }
 
       function removeLink(i) {
-        storedLinks.splice(i, 1);
+        linkToRemove = storedLinks.splice(i, 1)[0];
         list.childNodes[list.childNodes.length - i - 1].remove();
-        localStorage.setItem('links', JSON.stringify(storedLinks));
+
+        fetch('http://localhost:8080/api/bookmarks/', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(linkToRemove)
+        }).then(response => alert(response));
       }
 
       function openShareWindow(link) {
@@ -74,26 +78,48 @@
       }
 
       document.addEventListener('DOMContentLoaded', function(event) {
-        showLinks();
+        fetch('http://localhost:8080/api/bookmarks/all')
+          .then(response => {
+            return response.json();
+          })
+          .then(json => {
+            storedLinks = json;
+            showLinks();
+          })
+          .catch(error => alert('Something went wrong'));
+
         addButton = document.querySelector('#add');
+
         addButton.addEventListener('click', function(event) {
           link = document.querySelector('#link');
-          if (storedLinks.indexOf(link.value) !== -1) {
+
+          if (storedLinks.findIndex(item => item.link === link.value) !== -1) {
             alert('This link is already in the list');
           } else {
-            addLink(link.value);
-            storedLinks.push(link.value);
-            localStorage.setItem('links', JSON.stringify(storedLinks));
+            linkItem = { link: link.value, tags: [], text: '' };
+            addLink(linkItem);
+
+            fetch('http://localhost:8080/api/bookmarks/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(linkItem)
+            })
+              .then(response => response.json())
+              .then(json => (linkItem._id = json._id));
+            storedLinks.push(linkItem);
             link.value = null;
           }
         });
 
         list.addEventListener('click', function(event) {
           targetLink = event.target.parentNode.firstChild.nodeValue;
+
           if (event.target.classList.contains('btn-outline-primary')) {
             openShareWindow(targetLink);
           } else if (event.target.classList.contains('btn-outline-danger')) {
-            removeLink(storedLinks.indexOf(targetLink));
+            removeLink(storedLinks.findIndex(item => item.link === targetLink));
           }
         });
       });
