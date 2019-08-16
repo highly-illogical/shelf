@@ -42,6 +42,16 @@
         storedLinks.forEach(item => addLink(item));
       }
 
+      function createTextShow(text) {
+        const textShow = document.createElement('div');
+        textShow.style.margin = '10px 10px 20px 20px';
+        textShow.style.fontSize = '14.5px';
+        textShow.style.color = 'rgb(120, 120, 120)';
+        textShow.style.display = 'none';
+        textShow.appendChild(document.createTextNode(text));
+        return textShow;
+      }
+
       function addLink(item) {
         const newLink = document.createElement('li');
         newLink.setAttribute('class', 'list-group-item');
@@ -55,8 +65,29 @@
         removeButton.setAttribute('class', 'btn btn-outline-danger btn-sm');
         removeButton.innerText = 'Remove';
 
+        const addTextButton = document.createElement('button');
+        addTextButton.setAttribute(
+          'class',
+          'btn btn-outline-secondary btn-sm m-2'
+        );
+        addTextButton.innerText = 'Edit Text';
+        addTextButton.style.display = 'none';
+
+        const tagList = document.createElement('div');
+        tagList.style.display = 'none';
+
+        item.tags.forEach(tag => {
+          const badge = document.createElement('span');
+          badge.setAttribute('class', 'badge badge-pill badge-dark m-1');
+          badge.innerText = tag;
+          tagList.appendChild(badge);
+        });
+
         newLink.appendChild(shareButton);
         newLink.appendChild(removeButton);
+        newLink.appendChild(addTextButton);
+        newLink.appendChild(createTextShow(item.text));
+        newLink.appendChild(tagList);
         list.prepend(newLink);
       }
 
@@ -71,6 +102,10 @@
           },
           body: JSON.stringify(linkToRemove)
         }).then(response => alert(response));
+      }
+
+      function updateText(i, newtext) {
+        storedLinks[i].text = newtext;
       }
 
       function openShareWindow(link) {
@@ -96,7 +131,11 @@
           if (storedLinks.findIndex(item => item.link === link.value) !== -1) {
             alert('This link is already in the list');
           } else {
-            linkItem = { link: link.value, tags: [], text: '' };
+            linkItem = {
+              link: link.value,
+              tags: ['hello', 'world'],
+              text: 'Lorem ipsum dolor sit amet'
+            };
             addLink(linkItem);
 
             fetch('http://localhost:8080/api/bookmarks/', {
@@ -114,12 +153,53 @@
         });
 
         list.addEventListener('click', function(event) {
-          targetLink = event.target.parentNode.firstChild.nodeValue;
+          if (event.target.classList.contains('btn')) {
+            targetLink = event.target.parentNode.firstChild.nodeValue;
 
-          if (event.target.classList.contains('btn-outline-primary')) {
-            openShareWindow(targetLink);
-          } else if (event.target.classList.contains('btn-outline-danger')) {
-            removeLink(storedLinks.findIndex(item => item.link === targetLink));
+            if (event.target.classList.contains('btn-outline-primary')) {
+              openShareWindow(targetLink);
+            } else if (event.target.classList.contains('btn-outline-danger')) {
+              removeLink(
+                storedLinks.findIndex(item => item.link === targetLink)
+              );
+            } else if (
+              event.target.classList.contains('btn-outline-secondary')
+            ) {
+              const textEdit = document.createElement('textarea');
+              textEdit.setAttribute('class', 'form-control m-2');
+              textEdit.style.fontSize = '14.5px';
+              textEdit.value = event.target.parentNode.childNodes[4].innerText;
+
+              event.target.parentNode.childNodes[4].replaceWith(textEdit);
+              event.target.setAttribute(
+                'class',
+                'btn btn-outline-info btn-sm m-2'
+              );
+              event.target.innerText = 'Save';
+            } else if (event.target.classList.contains('btn-outline-info')) {
+              const textShow = createTextShow(
+                event.target.parentNode.childNodes[4].value
+              );
+              event.target.parentNode.childNodes[4].replaceWith(textShow);
+              event.target.parentNode.childNodes[4].style.display = '';
+
+              updateText(
+                storedLinks.findIndex(item => item.link === targetLink),
+                textShow.innerText
+              );
+
+              event.target.setAttribute(
+                'class',
+                'btn btn-outline-secondary btn-sm m-2'
+              );
+              event.target.innerText = 'Edit Text';
+            }
+          } else {
+            let toggle =
+              event.target.childNodes[3].style.display === 'none' ? '' : 'none';
+            event.target.childNodes[3].style.display = toggle;
+            event.target.childNodes[4].style.display = toggle;
+            event.target.childNodes[5].style.display = toggle;
           }
         });
       });
