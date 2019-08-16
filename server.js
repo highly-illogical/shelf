@@ -49,6 +49,19 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.put('/', async (req, res) => {
+  let response = await Link.findByIdAndUpdate(
+    req.body._id,
+    { text: req.body.text },
+    { new: true }
+  ).catch(error => console.log('Could not update document'));
+  if (response) {
+    res.send(response);
+  } else {
+    res.status(500).send('Error: could not update');
+  }
+});
+
 router.delete('/', async (req, res) => {
   let response = await Link.findByIdAndDelete(req.body._id).catch(error =>
     console.log('Could not delete document')
