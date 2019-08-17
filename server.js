@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
 router.put('/', async (req, res) => {
   let response = await Link.findByIdAndUpdate(
     req.body._id,
-    { text: req.body.text },
+    { text: req.body.text, tags: req.body.tags },
     { new: true }
   ).catch(error => console.log('Could not update document'));
   if (response) {

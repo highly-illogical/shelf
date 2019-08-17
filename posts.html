@@ -46,7 +46,7 @@
         const textShow = document.createElement('div');
         textShow.style.margin = '10px 10px 20px 20px';
         textShow.style.fontSize = '14.5px';
-        textShow.style.color = 'rgb(120, 120, 120)';
+        textShow.style.color = 'rgb(90, 90, 90)';
         textShow.style.display = 'none';
         textShow.appendChild(document.createTextNode(text));
         return textShow;
@@ -74,6 +74,7 @@
         addTextButton.style.display = 'none';
 
         const tagList = document.createElement('div');
+        tagList.setAttribute('class', 'form-inline');
         tagList.style.display = 'none';
 
         item.tags.forEach(tag => {
@@ -82,6 +83,30 @@
           badge.innerText = tag;
           tagList.appendChild(badge);
         });
+
+        const addTag = document.createElement('input');
+        const addTagButton = document.createElement('button');
+        const outerTag = document.createElement('div');
+        const innerTag = document.createElement('div');
+
+        addTag.setAttribute('class', 'form-control form-control-sm');
+        addTag.setAttribute('type', 'text');
+        addTag.setAttribute('placeholder', 'Add tags');
+        addTag.style.fontSize = '12px';
+        addTag.style.margin = '0 0 0 10px';
+        addTagButton.setAttribute('class', 'btn btn-light btn-sm');
+        addTagButton.style.borderColor = 'lightgrey';
+        addTagButton.style.color = 'grey';
+        addTagButton.style.fontSize = '10px';
+        addTagButton.innerText = '+';
+        outerTag.setAttribute('class', 'input-group');
+        outerTag.style.width = '200px';
+        innerTag.setAttribute('class', 'input-group-append');
+
+        innerTag.appendChild(addTagButton);
+        outerTag.appendChild(addTag);
+        outerTag.appendChild(innerTag);
+        tagList.appendChild(outerTag);
 
         newLink.appendChild(shareButton);
         newLink.appendChild(removeButton);
@@ -101,7 +126,7 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(linkToRemove)
-        }).then(response => alert(response));
+        });
       }
 
       function updateText(i, newtext) {
@@ -113,7 +138,20 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(storedLinks[i])
-        }).then(response => alert(response));
+        });
+      }
+
+      function addNewTag(i, newtag) {
+        storedLinks[i].tags.push(newtag);
+        console.log(storedLinks[i].tags);
+
+        fetch('http://localhost:8080/api/bookmarks/', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(storedLinks[i])
+        });
       }
 
       function openShareWindow(link) {
@@ -141,7 +179,7 @@
           } else {
             linkItem = {
               link: link.value,
-              tags: ['hello', 'world'],
+              tags: [],
               text: 'Lorem ipsum dolor sit amet'
             };
             addLink(linkItem);
@@ -162,7 +200,7 @@
 
         list.addEventListener('click', function(event) {
           if (event.target.classList.contains('btn')) {
-            targetLink = event.target.parentNode.firstChild.nodeValue;
+            let targetLink = event.target.parentNode.firstChild.nodeValue;
 
             if (event.target.classList.contains('btn-outline-primary')) {
               openShareWindow(targetLink);
@@ -201,6 +239,23 @@
                 'btn btn-outline-secondary btn-sm m-2'
               );
               event.target.innerText = 'Edit Text';
+            } else if (event.target.classList.contains('btn-light')) {
+              let targetLink =
+                event.target.parentNode.parentNode.parentNode.parentNode
+                  .firstChild.nodeValue;
+              const newTag = document.createElement('span');
+              newTag.setAttribute('class', 'badge badge-pill badge-dark m-1');
+              newTag.innerText = event.target.parentNode.previousSibling.value;
+              event.target.parentNode.parentNode.parentNode.insertBefore(
+                newTag,
+                event.target.parentNode.parentNode
+              );
+              event.target.parentNode.previousSibling.value = '';
+
+              addNewTag(
+                storedLinks.findIndex(item => item.link === targetLink),
+                newTag.innerText
+              );
             }
           } else {
             let toggle =
