@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
+const request = require('request');
+const cheerio = require('cheerio');
 const morgan = require('morgan');
 const app = express();
 const router = express.Router();
@@ -15,6 +17,7 @@ const Link = mongoose.model(
       type: String,
       required: true
     },
+    title: String,
     tags: Array,
     text: String
   })
@@ -37,7 +40,11 @@ router.post('/', async (req, res) => {
     text: req.body.text
   });
 
-  console.log(req.body);
+  request(req.body.link, async (err, res, body) => {
+    const $ = cheerio.load(body);
+    link.title = $('title').text();
+    await link.save();
+  });
 
   let response = await Link.create(link).catch(error =>
     console.log('Could not create document')
