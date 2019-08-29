@@ -4,7 +4,7 @@
   "description": "App that allows you to save and share links",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "start": "node server.js"
   },
   "author": "",
@@ -15,5 +15,8 @@
     "mongoose": "^5.6.9",
     "morgan": "^1.9.1",
     "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.0"
   }
 }

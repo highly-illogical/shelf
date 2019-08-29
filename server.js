@@ -26,6 +26,7 @@ const Link = mongoose.model(
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static(__dirname));
 app.use('/api/bookmarks/', router);
 
 router.get('/all', async (req, res) => {
@@ -40,16 +41,16 @@ router.post('/', async (req, res) => {
     text: req.body.text
   });
 
-  request(req.body.link, async (err, res, body) => {
-    const $ = cheerio.load(body);
-    link.title = $('title').text();
-    await link.save();
-  });
-
   let response = await Link.create(link).catch(error =>
     console.log('Could not create document')
   );
+
   if (response) {
+    request(req.body.link, async (err, res, body) => {
+      const $ = cheerio.load(body);
+      link.title = $('title').text();
+      await link.save();
+    });
     res.send(response);
   } else {
     res.status(500).send('Error: could not create');
