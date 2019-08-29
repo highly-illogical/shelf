@@ -1,8 +1,9 @@
-let storedLinks = [];
+let storedLinks = [], allLinks = [];
 
 $(function () {
   $.get('http://localhost:8080/api/bookmarks/all', (data) => {
-    storedLinks = data;
+    allLinks = data;
+    storedLinks = allLinks.filter(link => link._id.length);
   });
 
   $('#add').click((e) => {
@@ -78,9 +79,6 @@ function addNewTag(i, tag) {
 function updateText(i, newtext) {
   storedLinks[i].text = newtext;
 
-  //$('#linklist').children(`:nth-child(${storedLinks.length - i})`)
-  //  .children(".textshow").text(newtext);
-
   $.ajax({
     url: 'http://localhost:8080/api/bookmarks',
     method: "PUT",
@@ -129,7 +127,13 @@ function displayLink(item) {
 
   item.tags.forEach(tag => {
     tagList.append($("<span></span>")
-      .attr('class', 'badge badge-pill badge-dark m-1').text(tag));
+      .attr('class', 'badge badge-pill badge-dark m-1')
+      .css('cursor', 'pointer').text(tag)
+      .click(function () {
+        storedLinks = allLinks.filter(link => link.tags.includes($(this).text()));
+        $('#linklist').empty();
+        showLinks(storedLinks);
+      }));
   });
 
   const addTag = $("<input></input>").attr({
