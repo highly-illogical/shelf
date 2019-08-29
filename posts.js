@@ -115,7 +115,7 @@ function openShareWindow(link) {
   window.open('https://www.facebook.com/sharer.php?u=' + link);
 }
 
-document.addEventListener('DOMContentLoaded', function(event) {
+document.addEventListener('DOMContentLoaded', function (event) {
   list = document.querySelector('#linklist');
 
   fetch('http://localhost:8080/api/bookmarks/all')
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   addButton = document.querySelector('#add');
 
-  addButton.addEventListener('click', function(event) {
+  addButton.addEventListener('click', function (event) {
     link = document.querySelector('#link');
 
     if (storedLinks.findIndex(item => item.link === link.value) !== -1) {
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     }
   });
 
-  list.addEventListener('click', function(event) {
+  list.addEventListener('click', function (event) {
     if (event.target.classList.contains('btn')) {
       let targetLink = event.target.parentNode.firstChild.nodeValue;
 

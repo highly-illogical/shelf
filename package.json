@@ -1,5 +1,5 @@
 {
-  "name": "bookmark",
+  "name": "shelf",
   "version": "1.0.0",
   "description": "App that allows you to save and share links",
   "main": "server.js",
