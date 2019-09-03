@@ -4,6 +4,7 @@
   "description": "App that allows you to save and share links",
   "main": "server.js",
   "scripts": {
+    "build": "webpack",
     "test": "mocha",
     "start": "node server.js"
   },
@@ -14,9 +15,19 @@
     "express": "^4.17.1",
     "mongoose": "^5.6.9",
     "morgan": "^1.9.1",
-    "request": "^2.88.0"
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "request": "^2.88.0",
+    "webpack-dev-server": "^3.8.0"
   },
   "devDependencies": {
-    "mocha": "^6.2.0"
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.6",
+    "mocha": "^6.2.0",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7"
   }
 }

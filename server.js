@@ -26,7 +26,7 @@ const Link = mongoose.model(
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(__dirname + '/dist'));
 app.use('/api/bookmarks/', router);
 
 router.get('/all', async (req, res) => {
@@ -82,7 +82,7 @@ router.delete('/', async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/posts.html');
+  res.sendFile(__dirname + '/dist/index.html');
 });
 
 app.listen(8080, () => console.log('App listening on port 8080...'));
