@@ -3,53 +3,39 @@ import Link from './components/link';
 
 class App extends Component {
   state = {
-    links: [
-      {
-        id: 1,
-        url: 'http://www.google.com',
-        text: 'Lorem ipsum dolor sit amet',
-        tags: ['politics', 'marxism'],
-        isExpanded: false,
-        currentlyEditing: false
-      },
-      {
-        id: 2,
-        url: 'http://www.facebook.com',
-        text: 'Hello world',
-        tags: ['books'],
-        isExpanded: false,
-        currentlyEditing: false
-      },
-      {
-        id: 3,
-        url: 'http://twitter.com',
-        text: '(No text)',
-        tags: ['the guardian', 'left'],
-        isExpanded: false,
-        currentlyEditing: false
-      }
-    ]
+    links: []
   };
 
   toggleLink = id => {
     this.setState({
       links: this.state.links.map(link => {
-        if (link.id === id) link.isExpanded = !link.isExpanded;
+        if (link._id === id) link.isExpanded = !link.isExpanded;
         return link;
       })
     });
   };
 
   removeLink = id => {
+    const newLinks = [...this.state.links];
+    const linkToRemove = newLinks.find(link => link._id === id);
+
+    fetch('http://localhost:8080/api/bookmarks/', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(linkToRemove)
+    });
+
     this.setState({
-      links: this.state.links.filter(link => link.id !== id)
+      links: newLinks.filter(link => link._id !== id)
     });
   };
 
   editText = id => {
     this.setState({
       links: this.state.links.map(link => {
-        if (link.id === id) link.currentlyEditing = true;
+        if (link._id === id) link.currentlyEditing = true;
         return link;
       })
     });
@@ -58,7 +44,7 @@ class App extends Component {
   saveText = id => {
     this.setState({
       links: this.state.links.map(link => {
-        if (link.id === id) {
+        if (link._id === id) {
           link.currentlyEditing = false;
         }
         return link;
@@ -69,7 +55,7 @@ class App extends Component {
   handleChange = id => e => {
     this.setState({
       links: this.state.links.map(link => {
-        if (link.id === id) {
+        if (link._id === id) {
           link.text = e.target.value;
         }
         return link;
@@ -80,7 +66,7 @@ class App extends Component {
   addTag = id => tagName => {
     this.setState({
       links: this.state.links.map(link => {
-        if (link.id === id) {
+        if (link._id === id) {
           link.tags.push(tagName);
         }
         return link;
@@ -91,7 +77,7 @@ class App extends Component {
   removeTag = id => tagId => {
     this.setState({
       links: this.state.links.map(link => {
-        if (link.id === id) {
+        if (link._id === id) {
           link.tags.splice(tagId, 1);
         }
         return link;
@@ -103,8 +89,9 @@ class App extends Component {
 
   addLink = e => {
     e.preventDefault();
+    const newLinks = [...this.state.links].reverse();
+
     const newLink = {
-      id: this.state.links.length + 1,
       url: this.exampleRef.current.value,
       text: '(No text)',
       tags: [],
@@ -112,15 +99,40 @@ class App extends Component {
       currentlyEditing: false
     };
 
-    const newLinks = [...this.state.links];
-    newLinks.push(newLink);
+    if (newLinks.find(link => link.url === newLink.url) !== undefined)
+      alert('This link is already in the list');
+    else {
+      fetch('http://localhost:8080/api/bookmarks/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newLink)
+      })
+        .then(response => response.json())
+        .then(json => (newLink._id = json._id))
+        .catch(error => alert('Something went wrong'));
 
-    this.setState({
-      links: newLinks
-    });
+      newLinks.push(newLink);
 
-    this.exampleRef.current.value = '';
+      this.setState({
+        links: newLinks.reverse()
+      });
+
+      this.exampleRef.current.value = '';
+    }
   };
+
+  componentDidMount() {
+    fetch('http://localhost:8080/api/bookmarks/all')
+      .then(response => {
+        return response.json();
+      })
+      .then(json => {
+        this.setState({ links: json.reverse() });
+      })
+      .catch(error => alert('Something went wrong'));
+  }
 
   render() {
     return (
@@ -144,15 +156,15 @@ class App extends Component {
         <ul className="list-group">
           {this.state.links.map(link => (
             <Link
-              key={link.id}
+              key={link._id}
               link={link}
-              onClick={() => this.toggleLink(link.id)}
-              onEdit={() => this.editText(link.id)}
-              onSave={() => this.saveText(link.id)}
-              onRemove={() => this.removeLink(link.id)}
-              handleChange={this.handleChange(link.id)}
-              addTag={this.addTag(link.id)}
-              removeTag={this.removeTag(link.id)}
+              onClick={() => this.toggleLink(link._id)}
+              onEdit={() => this.editText(link._id)}
+              onSave={() => this.saveText(link._id)}
+              onRemove={() => this.removeLink(link._id)}
+              handleChange={this.handleChange(link._id)}
+              addTag={this.addTag(link._id)}
+              removeTag={this.removeTag(link._id)}
             />
           ))}
         </ul>

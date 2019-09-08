@@ -30,7 +30,9 @@ class Link extends Component {
     } = this.props;
     return (
       <li className="list-group-item" onClick={this.handleClick}>
-        {link.url}
+        <a style={{ color: 'black' }} href={link.url}>
+          {link.title}
+        </a>
         <button className="btn btn-outline-primary btn-sm m-2">Share</button>
         <button className="btn btn-outline-danger btn-sm" onClick={onRemove}>
           Remove

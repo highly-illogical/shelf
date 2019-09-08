@@ -13,7 +13,7 @@ mongoose
 const Link = mongoose.model(
   'Link',
   new mongoose.Schema({
-    link: {
+    url: {
       type: String,
       required: true
     },
@@ -30,13 +30,13 @@ app.use(express.static(__dirname + '/dist'));
 app.use('/api/bookmarks/', router);
 
 router.get('/all', async (req, res) => {
-  let links = await Link.find();
+  let links = await Link.find().catch(err => console.log(err));
   res.send(links);
 });
 
 router.post('/', async (req, res) => {
   let link = new Link({
-    link: req.body.link,
+    url: req.body.url,
     tags: req.body.tags,
     text: req.body.text
   });
@@ -46,7 +46,7 @@ router.post('/', async (req, res) => {
   );
 
   if (response) {
-    request(req.body.link, async (err, res, body) => {
+    request(req.body.url, async (err, res, body) => {
       const $ = cheerio.load(body);
       link.title = $('title').text();
       await link.save();
