@@ -46,6 +46,16 @@ class App extends Component {
       links: this.state.links.map(link => {
         if (link._id === id) {
           link.currentlyEditing = false;
+          fetch('http://localhost:8080/api/bookmarks/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(link)
+          })
+            .then(response => response.json())
+            .then(json => (link = json))
+            .catch(error => alert('Something went wrong'));
         }
         return link;
       })
@@ -68,6 +78,16 @@ class App extends Component {
       links: this.state.links.map(link => {
         if (link._id === id) {
           link.tags.push(tagName);
+          fetch('http://localhost:8080/api/bookmarks/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(link)
+          })
+            .then(response => response.json())
+            .then(json => (link = json))
+            .catch(error => alert('Something went wrong'));
         }
         return link;
       })
@@ -79,6 +99,16 @@ class App extends Component {
       links: this.state.links.map(link => {
         if (link._id === id) {
           link.tags.splice(tagId, 1);
+          fetch('http://localhost:8080/api/bookmarks/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(link)
+          })
+            .then(response => response.json())
+            .then(json => (link = json))
+            .catch(error => alert('Something went wrong'));
         }
         return link;
       })

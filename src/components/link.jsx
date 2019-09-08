@@ -9,12 +9,16 @@ class Link extends Component {
   };
 
   handleClick = e => {
-    if (e.target.className === 'list-group-item') this.props.onClick();
+    if (e.target.className === 'main-link') this.props.onClick();
   };
 
   handleAddTag = () => {
     this.props.addTag(this.tagRef.current.value);
     this.tagRef.current.value = '';
+  };
+
+  openShareWindow = () => {
+    window.open('https://www.facebook.com/sharer.php?u=' + this.props.link.url);
   };
 
   tagRef = React.createRef();
@@ -30,30 +34,41 @@ class Link extends Component {
     } = this.props;
     return (
       <li className="list-group-item" onClick={this.handleClick}>
-        <a style={{ color: 'black' }} href={link.url}>
-          {link.title}
-        </a>
-        <button className="btn btn-outline-primary btn-sm m-2">Share</button>
-        <button className="btn btn-outline-danger btn-sm" onClick={onRemove}>
-          Remove
-        </button>
-        {link.currentlyEditing ? (
-          <button
-            className="btn btn-outline-info btn-sm m-2"
-            style={this.linkVisibility(link.isExpanded)}
-            onClick={onSave}
+        <div class="main-link" style={{ cursor: 'pointer' }}>
+          <a
+            style={{ color: 'rgb(33, 37, 41)', textDecoration: 'none' }}
+            href={link.url}
+            target="_blank"
           >
-            Save
-          </button>
-        ) : (
+            {link.title}
+          </a>
           <button
-            className="btn btn-outline-secondary btn-sm m-2"
-            style={this.linkVisibility(link.isExpanded)}
-            onClick={onEdit}
+            className="btn btn-outline-primary btn-sm m-2"
+            onClick={this.openShareWindow}
           >
-            Edit Text
+            Share
           </button>
-        )}
+          <button className="btn btn-outline-danger btn-sm" onClick={onRemove}>
+            Remove
+          </button>
+          {link.currentlyEditing ? (
+            <button
+              className="btn btn-outline-info btn-sm m-2"
+              style={this.linkVisibility(link.isExpanded)}
+              onClick={onSave}
+            >
+              Save
+            </button>
+          ) : (
+            <button
+              className="btn btn-outline-secondary btn-sm m-2"
+              style={this.linkVisibility(link.isExpanded)}
+              onClick={onEdit}
+            >
+              Edit Text
+            </button>
+          )}
+        </div>
         <div className="m-3" style={this.linkVisibility(link.isExpanded)}>
           {link.currentlyEditing ? (
             <textarea
