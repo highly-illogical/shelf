@@ -34,13 +34,13 @@ class Link extends Component {
     } = this.props;
     return (
       <li className="list-group-item" onClick={this.handleClick}>
-        <div class="main-link" style={{ cursor: 'pointer' }}>
+        <div className="main-link" style={{ cursor: 'pointer' }}>
           <a
             style={{ color: 'rgb(33, 37, 41)', textDecoration: 'none' }}
             href={link.url}
             target="_blank"
           >
-            {link.title}
+            {link.url}
           </a>
           <button
             className="btn btn-outline-primary btn-sm m-2"

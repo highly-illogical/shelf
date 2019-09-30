@@ -1,5 +1,11 @@
 import React, { Component } from 'react';
 import Link from './components/link';
+import firebaseConfig from './config/firebaseConfig';
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+const linkRef = db.ref('links');
 
 class App extends Component {
   state = {
@@ -19,13 +25,7 @@ class App extends Component {
     const newLinks = [...this.state.links];
     const linkToRemove = newLinks.find(link => link._id === id);
 
-    fetch('http://localhost:8080/api/bookmarks/', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(linkToRemove)
-    });
+    // Remove link in Firebase
 
     this.setState({
       links: newLinks.filter(link => link._id !== id)
@@ -46,18 +46,11 @@ class App extends Component {
       links: this.state.links.map(link => {
         if (link._id === id) {
           link.currentlyEditing = false;
-          fetch('http://localhost:8080/api/bookmarks/', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(link)
-          })
-            .then(response => response.json())
-            .then(json => (link = json))
-            .catch(error => alert('Something went wrong'));
+
+          // Update record in Firebase
+
+          return link;
         }
-        return link;
       })
     });
   };
@@ -78,18 +71,11 @@ class App extends Component {
       links: this.state.links.map(link => {
         if (link._id === id) {
           link.tags.push(tagName);
-          fetch('http://localhost:8080/api/bookmarks/', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(link)
-          })
-            .then(response => response.json())
-            .then(json => (link = json))
-            .catch(error => alert('Something went wrong'));
+
+          // Update record in Firebase
+
+          return link;
         }
-        return link;
       })
     });
   };
@@ -99,18 +85,11 @@ class App extends Component {
       links: this.state.links.map(link => {
         if (link._id === id) {
           link.tags.splice(tagId, 1);
-          fetch('http://localhost:8080/api/bookmarks/', {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(link)
-          })
-            .then(response => response.json())
-            .then(json => (link = json))
-            .catch(error => alert('Something went wrong'));
+
+          // Update record in Firebase
+
+          return link;
         }
-        return link;
       })
     });
   };
@@ -132,16 +111,10 @@ class App extends Component {
     if (newLinks.find(link => link.url === newLink.url) !== undefined)
       alert('This link is already in the list');
     else {
-      fetch('http://localhost:8080/api/bookmarks/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newLink)
-      })
-        .then(response => response.json())
-        .then(json => (newLink._id = json._id))
-        .catch(error => alert('Something went wrong'));
+      const data = (({ url, text, tags }) => ({ url, text, tags }))(newLink);
+      linkRef.push(data);
+
+      // Get new list of links
 
       newLinks.push(newLink);
 
@@ -154,14 +127,29 @@ class App extends Component {
   };
 
   componentDidMount() {
-    fetch('http://localhost:8080/api/bookmarks/all')
-      .then(response => {
-        return response.json();
-      })
-      .then(json => {
-        this.setState({ links: json.reverse() });
-      })
-      .catch(error => alert('Something went wrong'));
+    // Get links from Firebase and update state
+
+    linkRef.on(
+      'value',
+      data => {
+        let response = data.val();
+        let links = Object.keys(response).map(key => {
+          const link = {};
+          link._id = key;
+          link.url = response[key].url;
+          link.tags =
+            response[key].tags === undefined ? [] : response[key].tags;
+          return link;
+        });
+        console.log(links);
+        this.setState({ links });
+      },
+      errData
+    );
+
+    function errData(err) {
+      console.log(err);
+    }
   }
 
   render() {
