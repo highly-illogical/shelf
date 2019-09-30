@@ -22,14 +22,7 @@ class App extends Component {
   };
 
   removeLink = id => {
-    const newLinks = [...this.state.links];
-    const linkToRemove = newLinks.find(link => link._id === id);
-
-    // Remove link in Firebase
-
-    this.setState({
-      links: newLinks.filter(link => link._id !== id)
-    });
+    linkRef.child(id).remove();
   };
 
   editText = id => {
@@ -42,17 +35,8 @@ class App extends Component {
   };
 
   saveText = id => {
-    this.setState({
-      links: this.state.links.map(link => {
-        if (link._id === id) {
-          link.currentlyEditing = false;
-
-          // Update record in Firebase
-
-          return link;
-        }
-      })
-    });
+    let newText = this.state.links.find(link => link._id === id).text;
+    linkRef.child(id).update({ text: newText });
   };
 
   handleChange = id => e => {
@@ -67,63 +51,34 @@ class App extends Component {
   };
 
   addTag = id => tagName => {
-    this.setState({
-      links: this.state.links.map(link => {
-        if (link._id === id) {
-          link.tags.push(tagName);
-
-          // Update record in Firebase
-
-          return link;
-        }
-      })
-    });
+    let newTags = this.state.links.find(link => link._id === id).tags;
+    newTags.push(tagName);
+    linkRef.child(id).update({ tags: newTags });
   };
 
   removeTag = id => tagId => {
-    this.setState({
-      links: this.state.links.map(link => {
-        if (link._id === id) {
-          link.tags.splice(tagId, 1);
-
-          // Update record in Firebase
-
-          return link;
-        }
-      })
-    });
+    let newTags = this.state.links.find(link => link._id === id).tags;
+    newTags.splice(tagId, 1);
+    linkRef.child(id).update({ tags: newTags });
   };
 
   exampleRef = React.createRef();
 
   addLink = e => {
     e.preventDefault();
-    const newLinks = [...this.state.links].reverse();
 
     const newLink = {
       url: this.exampleRef.current.value,
       text: '(No text)',
-      tags: [],
-      isExpanded: false,
-      currentlyEditing: false
+      tags: []
     };
 
-    if (newLinks.find(link => link.url === newLink.url) !== undefined)
+    if (this.state.links.find(link => link.url === newLink.url) !== undefined)
       alert('This link is already in the list');
     else {
-      const data = (({ url, text, tags }) => ({ url, text, tags }))(newLink);
-      linkRef.push(data);
-
-      // Get new list of links
-
-      newLinks.push(newLink);
-
-      this.setState({
-        links: newLinks.reverse()
-      });
-
-      this.exampleRef.current.value = '';
+      linkRef.push(newLink);
     }
+    this.exampleRef.current.value = '';
   };
 
   componentDidMount() {
@@ -137,11 +92,17 @@ class App extends Component {
           const link = {};
           link._id = key;
           link.url = response[key].url;
+          link.text = response[key].text;
           link.tags =
             response[key].tags === undefined ? [] : response[key].tags;
+          link.currentlyEditing = false;
+
+          let currentLink = this.state.links.find(link => link._id === key);
+          link.isExpanded =
+            currentLink === undefined ? false : currentLink.isExpanded;
           return link;
         });
-        console.log(links);
+        links.reverse();
         this.setState({ links });
       },
       errData
