@@ -62,13 +62,13 @@ class App extends Component {
     linkRef.child(id).update({ tags: newTags });
   };
 
-  exampleRef = React.createRef();
+  linkItemRef = React.createRef();
 
   addLink = e => {
     e.preventDefault();
 
     const newLink = {
-      url: this.exampleRef.current.value,
+      url: this.linkItemRef.current.value,
       text: '(No text)',
       tags: []
     };
@@ -78,7 +78,7 @@ class App extends Component {
     else {
       linkRef.push(newLink);
     }
-    this.exampleRef.current.value = '';
+    this.linkItemRef.current.value = '';
   };
 
   componentDidMount() {
@@ -87,23 +87,30 @@ class App extends Component {
     linkRef.on(
       'value',
       data => {
-        let response = data.val();
-        let links = Object.keys(response).map(key => {
-          const link = {};
-          link._id = key;
-          link.url = response[key].url;
-          link.text = response[key].text;
-          link.tags =
-            response[key].tags === undefined ? [] : response[key].tags;
-          link.currentlyEditing = false;
+        // If there's no data, Firebase automatically deletes the parent ref.
+        // Check for the existence of the snapshot before proceeding.
 
-          let currentLink = this.state.links.find(link => link._id === key);
-          link.isExpanded =
-            currentLink === undefined ? false : currentLink.isExpanded;
-          return link;
-        });
-        links.reverse();
-        this.setState({ links });
+        if (data.exists()) {
+          let response = data.val();
+          let links = Object.keys(response).map(key => {
+            const link = {};
+            link._id = key;
+            link.url = response[key].url;
+            link.text = response[key].text;
+            link.tags =
+              response[key].tags === undefined ? [] : response[key].tags;
+            link.currentlyEditing = false;
+
+            let currentLink = this.state.links.find(link => link._id === key);
+            link.isExpanded =
+              currentLink === undefined ? false : currentLink.isExpanded;
+            return link;
+          });
+          links.reverse();
+          this.setState({ links });
+        } else {
+          this.setState({ links: [] });
+        }
       },
       errData
     );
@@ -122,7 +129,7 @@ class App extends Component {
         <div className="input-group">
           <input
             type="text"
-            ref={this.exampleRef}
+            ref={this.linkItemRef}
             className="form-control"
             placeholder="Enter link here"
           />
