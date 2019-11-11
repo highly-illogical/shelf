@@ -101,7 +101,12 @@ class Link extends Component {
           style={this.linkVisibility(link.isExpanded)}
         >
           {this.props.link.tags.map((tag, index) => (
-            <Tag key={index} tag={tag} onRemove={() => removeTag(index)} />
+            <Tag
+              key={index}
+              isLoggedIn={isLoggedIn}
+              tag={tag}
+              onRemove={() => removeTag(index)}
+            />
           ))}
           {isLoggedIn && (
             <div className="input-group" style={{ margin: '0 0 0 10px' }}>

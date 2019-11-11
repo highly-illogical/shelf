@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Link from './components/Link';
+import Header from './components/Header';
 import firebaseConfig from './config/firebaseConfig';
 
 firebase.initializeApp(firebaseConfig);
@@ -165,54 +166,49 @@ class App extends Component {
     const { isLoggedIn } = this.state;
 
     return (
-      <div
-        className="container"
-        style={{ fontFamily: 'Roboto', fontSize: '15px', marginTop: '50px' }}
-      >
-        {!isLoggedIn ? (
-          <button className="btn btn-primary mb-4" onClick={this.handleLogin}>
-            Sign In
-          </button>
-        ) : (
-          <button
-            className="btn btn-secondary mb-4"
-            onClick={this.handleLogout}
-          >
-            Sign Out
-          </button>
-        )}
-        {isLoggedIn && (
-          <div className="input-group">
-            <input
-              type="text"
-              ref={this.linkItemRef}
-              className="form-control"
-              placeholder="Enter link here"
-            />
-            <div className="input-group-append">
-              <button className="btn btn-info" onClick={this.addLink}>
-                Add
-              </button>
+      <React.Fragment>
+        <Header
+          isLoggedIn={isLoggedIn}
+          handleLogin={this.handleLogin}
+          handleLogout={this.handleLogout}
+        />
+        <div
+          className="container"
+          style={{ fontFamily: 'Roboto', fontSize: '15px', marginTop: '50px' }}
+        >
+          {isLoggedIn && (
+            <div className="input-group">
+              <input
+                type="text"
+                ref={this.linkItemRef}
+                className="form-control"
+                placeholder="Enter link here"
+              />
+              <div className="input-group-append">
+                <button className="btn btn-info" onClick={this.addLink}>
+                  Add
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-        <ul className="list-group">
-          {this.state.links.map(link => (
-            <Link
-              key={link._id}
-              isLoggedIn={isLoggedIn}
-              link={link}
-              onClick={() => this.toggleLink(link._id)}
-              onEdit={() => this.editText(link._id)}
-              onSave={() => this.saveText(link._id)}
-              onRemove={() => this.removeLink(link._id)}
-              handleChange={this.handleChange(link._id)}
-              addTag={this.addTag(link._id)}
-              removeTag={this.removeTag(link._id)}
-            />
-          ))}
-        </ul>
-      </div>
+          )}
+          <ul className="list-group">
+            {this.state.links.map(link => (
+              <Link
+                key={link._id}
+                isLoggedIn={isLoggedIn}
+                link={link}
+                onClick={() => this.toggleLink(link._id)}
+                onEdit={() => this.editText(link._id)}
+                onSave={() => this.saveText(link._id)}
+                onRemove={() => this.removeLink(link._id)}
+                handleChange={this.handleChange(link._id)}
+                addTag={this.addTag(link._id)}
+                removeTag={this.removeTag(link._id)}
+              />
+            ))}
+          </ul>
+        </div>
+      </React.Fragment>
     );
   }
 }
