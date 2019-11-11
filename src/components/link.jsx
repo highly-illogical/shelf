@@ -25,6 +25,7 @@ class Link extends Component {
 
   render() {
     const {
+      isLoggedIn,
       link,
       onEdit,
       onSave,
@@ -48,26 +49,32 @@ class Link extends Component {
           >
             Share
           </button>
-          <button className="btn btn-outline-danger btn-sm" onClick={onRemove}>
-            Remove
-          </button>
-          {link.currentlyEditing ? (
+          {isLoggedIn && (
             <button
-              className="btn btn-outline-info btn-sm m-2"
-              style={this.linkVisibility(link.isExpanded)}
-              onClick={onSave}
+              className="btn btn-outline-danger btn-sm"
+              onClick={onRemove}
             >
-              Save
-            </button>
-          ) : (
-            <button
-              className="btn btn-outline-secondary btn-sm m-2"
-              style={this.linkVisibility(link.isExpanded)}
-              onClick={onEdit}
-            >
-              Edit Text
+              Remove
             </button>
           )}
+          {isLoggedIn &&
+            (link.currentlyEditing ? (
+              <button
+                className="btn btn-outline-info btn-sm m-2"
+                style={this.linkVisibility(link.isExpanded)}
+                onClick={onSave}
+              >
+                Save
+              </button>
+            ) : (
+              <button
+                className="btn btn-outline-secondary btn-sm m-2"
+                style={this.linkVisibility(link.isExpanded)}
+                onClick={onEdit}
+              >
+                Edit Text
+              </button>
+            ))}
         </div>
         <div className="m-3" style={this.linkVisibility(link.isExpanded)}>
           {link.currentlyEditing ? (
@@ -96,28 +103,30 @@ class Link extends Component {
           {this.props.link.tags.map((tag, index) => (
             <Tag key={index} tag={tag} onRemove={() => removeTag(index)} />
           ))}
-          <div className="input-group" style={{ margin: '0 0 0 10px' }}>
-            <input
-              type="text"
-              ref={this.tagRef}
-              className="form-control form-control-sm"
-              placeholder="Add tags..."
-              style={{ fontSize: '12px' }}
-            />
-            <div className="input-group-append">
-              <button
-                className="btn btn-light btn-sm"
-                onClick={this.handleAddTag}
-                style={{
-                  borderColor: 'lightgrey',
-                  color: '#b0b0b0',
-                  fontSize: '10px'
-                }}
-              >
-                <FontAwesomeIcon icon={faPlus} />
-              </button>
+          {isLoggedIn && (
+            <div className="input-group" style={{ margin: '0 0 0 10px' }}>
+              <input
+                type="text"
+                ref={this.tagRef}
+                className="form-control form-control-sm"
+                placeholder="Add tags..."
+                style={{ fontSize: '12px' }}
+              />
+              <div className="input-group-append">
+                <button
+                  className="btn btn-light btn-sm"
+                  onClick={this.handleAddTag}
+                  style={{
+                    borderColor: 'lightgrey',
+                    color: '#b0b0b0',
+                    fontSize: '10px'
+                  }}
+                >
+                  <FontAwesomeIcon icon={faPlus} />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </li>
     );

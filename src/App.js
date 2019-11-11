@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Link from './components/link';
+import Link from './components/Link';
 import firebaseConfig from './config/firebaseConfig';
 
 firebase.initializeApp(firebaseConfig);
@@ -9,6 +9,7 @@ const linkRef = db.ref('links');
 
 class App extends Component {
   state = {
+    isLoggedIn: false,
     links: []
   };
 
@@ -81,6 +82,46 @@ class App extends Component {
     this.linkItemRef.current.value = '';
   };
 
+  handleLogin = () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase
+      .auth()
+      .signInWithPopup(provider)
+      .then(result => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        var token = result.credential.accessToken;
+        // The signed-in user info.
+        var user = result.user;
+        this.setState({ isLoggedIn: true });
+        console.log(result);
+      })
+      .catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        console.log(error);
+      });
+  };
+
+  handleLogout = () => {
+    firebase
+      .auth()
+      .signOut()
+      .then(() => {
+        // Sign-out successful.
+        console.log('User signed out.');
+        this.setState({ isLoggedIn: false });
+      })
+      .catch(function(error) {
+        // An error happened.
+        console.log(error);
+      });
+  };
+
   componentDidMount() {
     // Get links from Firebase and update state
 
@@ -121,28 +162,45 @@ class App extends Component {
   }
 
   render() {
+    const { isLoggedIn } = this.state;
+
     return (
       <div
         className="container"
         style={{ fontFamily: 'Roboto', fontSize: '15px', marginTop: '50px' }}
       >
-        <div className="input-group">
-          <input
-            type="text"
-            ref={this.linkItemRef}
-            className="form-control"
-            placeholder="Enter link here"
-          />
-          <div className="input-group-append">
-            <button className="btn btn-info" onClick={this.addLink}>
-              Add
-            </button>
+        {!isLoggedIn ? (
+          <button className="btn btn-primary mb-4" onClick={this.handleLogin}>
+            Sign In
+          </button>
+        ) : (
+          <button
+            className="btn btn-secondary mb-4"
+            onClick={this.handleLogout}
+          >
+            Sign Out
+          </button>
+        )}
+        {isLoggedIn && (
+          <div className="input-group">
+            <input
+              type="text"
+              ref={this.linkItemRef}
+              className="form-control"
+              placeholder="Enter link here"
+            />
+            <div className="input-group-append">
+              <button className="btn btn-info" onClick={this.addLink}>
+                Add
+              </button>
+            </div>
           </div>
-        </div>
+        )}
         <ul className="list-group">
           {this.state.links.map(link => (
             <Link
               key={link._id}
+              isLoggedIn={isLoggedIn}
               link={link}
               onClick={() => this.toggleLink(link._id)}
               onEdit={() => this.editText(link._id)}
